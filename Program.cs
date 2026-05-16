@@ -1,112 +1,96 @@
-﻿using Microsoft.Data.SqlClient;
-using System;
-using System.ComponentModel.Design;
-using System.Data.SqlClient;
+﻿using System;
+using System.Collections.Generic;
+
+class Student
+{
+    public string Name;
+    public string Surname;
+    public int Score;
+}
 
 class Program
-{ 
-    static string connectionString = "Server=localhost\\SQLEXPRESS;Database=ExamDb;Trusted_Connection=True;TrustServerCertificate=True;";
+{
+    static List<Student> students = new List<Student>();
+
     static void Main()
-    {
-        Menu();
-    }
-    static void Menu()
     {
         while (true)
         {
-            Console.WriteLine("\n--- IMTANAN SISTEMI ---");
-            Console.WriteLine("1. Telebe elave et");
-            Console.WriteLine("2. Netice elave et");
-            Console.WriteLine("3. Telebeleri goster");
-            Console.WriteLine("4. Cixis");
-            Console.Write("Secim: ");
+            Console.WriteLine("\n--- IMTANAN NETICELERI SISTEMI ---");
+            Console.WriteLine("1. Tələbə əlavə et");
+            Console.WriteLine("2. Nəticələri göstər");
+            Console.WriteLine("3. Orta balı göstər");
+            Console.WriteLine("4. Çıxış");
+            Console.Write("Seçim: ");
 
             string choice = Console.ReadLine();
 
             if (choice == "1")
-            {
                 AddStudent();
-            }
             else if (choice == "2")
-            {
-                AddResult();
-            }
-            else if (choice == "3")
-            {
                 ShowStudents();
-            }
+            else if (choice == "3")
+                ShowAverage();
             else if (choice == "4")
-            {
                 break;
-            }
+            else
+                Console.WriteLine("Yanlış seçim!");
         }
     }
+
     static void AddStudent()
     {
+        Student s = new Student();
+
         Console.Write("Ad: ");
-        string name = Console.ReadLine();
+        s.Name = Console.ReadLine();
 
         Console.Write("Soyad: ");
-        string surname = Console.ReadLine();
+        s.Surname = Console.ReadLine();
 
-        SqlConnection conn = new SqlConnection(connectionString);
-        conn.Open();
+        Console.Write("Qiymət: ");
+        s.Score = Convert.ToInt32(Console.ReadLine());
 
-        string query = "INSERT INTO Studennts (Name, Surname) VALUES (@n, @s)";
-        SqlCommand cmd = new SqlCommand(query, conn);
+        students.Add(s);
 
-        cmd.Parameters.AddWithValue("@n", name);
-        cmd.Parameters.AddWithValue("@s", surname);
-
-        cmd.ExecuteNonQuery();
-        conn.Close();
-
-        Console.WriteLine("Telebe elave edildi!");
+        Console.WriteLine("Tələbə əlavə olundu!");
     }
-    static void AddResult()
-    {
-        Console.Write("Telebe ID: ");
-        int id = Convert.ToInt32(Console.ReadLine());
 
-        Console.Write("Fenn: ");
-        string subject = Console.ReadLine();
-
-        Console.Write("Bal: ");
-        int score = Convert.ToInt32(Console.ReadLine());
-
-        SqlConnection conn = new SqlConnection(connectionString);
-        conn.Open();
-
-        string query = "INSERT INTO Results (StudentId, Subject, Score) VALUES (@id, @sub, @sc)";
-        SqlCommand cmd = new SqlCommand(query, conn);
-
-        cmd.Parameters.AddWithValue("@id", id);
-        cmd.Parameters.AddWithValue("@sub", subject);
-        cmd.Parameters.AddWithValue("@sc", score);
-
-        cmd.ExecuteNonQuery();
-        conn.Close();
-
-        Console.WriteLine("Netice elave edildi!");
-    }
     static void ShowStudents()
     {
-        SqlConnection conn = new SqlConnection(connectionString);
-        conn.Open();
+        Console.WriteLine("\n--- NƏTİCƏLƏR ---");
 
-        string query = "SELECT * FROM Studennts";
-        SqlCommand cmd = new SqlCommand(query, conn);
-
-        SqlDataReader reader = cmd.ExecuteReader();
-
-        while (reader.Read())
+        if (students.Count == 0)
         {
-            Console.WriteLine(
-                $"ID: {reader["Id"]}, Ad: {reader["Name"]}, Soyad: {reader["Surname"]}"
-            );
+            Console.WriteLine("Heç tələbə yoxdur.");
+            return;
         }
 
-        conn.Close();
+        foreach (var s in students)
+        {
+            Console.WriteLine($"{s.Name} {s.Surname} - {s.Score}");
+        }
+    }
+
+    static void ShowAverage()
+    {
+        Console.WriteLine("\n--- ORTA BAL ---");
+
+        if (students.Count == 0)
+        {
+            Console.WriteLine("Heç tələbə yoxdur.");
+            return;
+        }
+
+        int sum = 0;
+
+        foreach (var s in students)
+        {
+            sum += s.Score;
+        }
+
+        double average = (double)sum / students.Count;
+
+        Console.WriteLine("Orta bal: " + average);
     }
 }
-
